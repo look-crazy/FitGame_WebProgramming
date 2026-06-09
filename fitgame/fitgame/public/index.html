@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FitGame - 운동을 게임으로</title>
+
+  <!-- 구글 폰트: Orbitron (게임 느낌) + Noto Sans KR (한글) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- Socket.io 클라이언트 -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <!-- 메인 CSS -->
+  <link rel="stylesheet" href="/css/main.css">
+
+  <!-- 파비콘 (이모지 사용) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+</head>
+<body>
+
+  <!-- ============================
+    로딩 오버레이
+  ============================ -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-content">
+      <div class="loading-logo">FIT<span>GAME</span></div>
+      <div class="loading-bar">
+        <div class="loading-bar-fill"></div>
+      </div>
+      <p class="loading-text">LOADING...</p>
+    </div>
+  </div>
+
+  <!-- ============================
+    인증 화면 (로그인/회원가입)
+    로그인 전에만 표시
+  ============================ -->
+  <div id="authScreen" class="auth-screen hidden">
+    <div class="auth-bg-effects">
+      <div class="auth-orb auth-orb-1"></div>
+      <div class="auth-orb auth-orb-2"></div>
+      <div class="auth-grid"></div>
+    </div>
+
+    <div class="auth-container">
+      <!-- 로고 -->
+      <div class="auth-logo">
+        <span class="auth-logo-icon">⚡</span>
+        <h1>FIT<span>GAME</span></h1>
+        <p>운동을 게임으로 바꾸다</p>
+      </div>
+
+      <!-- 탭 전환 (로그인 / 회원가입) -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">로그인</button>
+        <button class="auth-tab" data-tab="register">회원가입</button>
+      </div>
+
+      <!-- 로그인 폼 -->
+      <form id="loginForm" class="auth-form active">
+        <div class="form-group">
+          <label>이메일</label>
+          <input type="email" id="loginEmail" placeholder="example@email.com" required>
+        </div>
+        <div class="form-group">
+          <label>비밀번호</label>
+          <input type="password" id="loginPassword" placeholder="비밀번호 입력" required>
+        </div>
+        <div id="loginError" class="form-error hidden"></div>
+        <button type="submit" class="btn-primary btn-full">
+          <span>로그인</span>
+          <span class="btn-icon">→</span>
+        </button>
+        <p class="auth-demo-hint">
+          🎮 테스트 계정: test@fitgame.com / test1234
+        </p>
+      </form>
+
+      <!-- 회원가입 폼 -->
+      <form id="registerForm" class="auth-form hidden">
+        <div class="form-group">
+          <label>이메일</label>
+          <input type="email" id="regEmail" placeholder="example@email.com" required>
+        </div>
+        <div class="form-group">
+          <label>닉네임</label>
+          <div class="input-with-btn">
+            <input type="text" id="regNickname" placeholder="2~15자 닉네임" maxlength="15" required>
+            <button type="button" id="checkNicknameBtn" class="btn-secondary btn-sm">중복 확인</button>
+          </div>
+          <div id="nicknameStatus" class="form-hint"></div>
+        </div>
+        <div class="form-group">
+          <label>비밀번호</label>
+          <input type="password" id="regPassword" placeholder="6자 이상" required>
+        </div>
+        <div class="form-group">
+          <label>프로필 이미지 <span class="optional">(선택)</span></label>
+          <div class="file-upload-area" id="fileUploadArea">
+            <input type="file" id="regProfileImage" accept="image/*" hidden>
+            <div class="file-upload-placeholder">
+              <span class="upload-icon">📷</span>
+              <span>클릭하여 이미지 선택</span>
+            </div>
+            <img id="profilePreview" class="profile-preview hidden" alt="미리보기">
+          </div>
+        </div>
+        <div id="registerError" class="form-error hidden"></div>
+        <button type="submit" class="btn-primary btn-full">
+          <span>게임 시작하기</span>
+          <span class="btn-icon">⚡</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================
+    메인 앱 화면 (로그인 후)
+  ============================ -->
+  <div id="mainApp" class="main-app hidden">
+
+    <!-- 사이드바 네비게이션 -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <span>⚡</span>
+        <span class="logo-text">FIT<span>GAME</span></span>
+      </div>
+
+      <!-- 유저 미니 프로필 -->
+      <div class="sidebar-profile">
+        <div class="sidebar-avatar" id="sidebarAvatar"></div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-nickname" id="sidebarNickname">Loading...</div>
+          <div class="sidebar-tier" id="sidebarTier">BRONZE Lv.1</div>
+        </div>
+      </div>
+
+      <!-- 네비 메뉴 -->
+      <ul class="sidebar-menu">
+        <li><a href="#" class="nav-item active" data-page="dashboard">
+          <span class="nav-icon">🏠</span><span>대시보드</span>
+        </a></li>
+        <li><a href="#" class="nav-item" data-page="workout">
+          <span class="nav-icon">💪</span><span>운동 기록</span>
+        </a></li>
+        <li><a href="#" class="nav-item" data-page="stats">
+          <span class="nav-icon">📊</span><span>통계</span>
+        </a></li>
+        <li><a href="#" class="nav-item" data-page="ranking">
+          <span class="nav-icon">🏆</span><span>랭킹</span>
+        </a></li>
+        <li><a href="#" class="nav-item" data-page="battle">
+          <span class="nav-icon">⚔️</span><span>배틀</span>
+        </a></li>
+        <li><a href="#" class="nav-item" data-page="achievements">
+          <span class="nav-icon">🎖️</span><span>업적</span>
+        </a></li>
+        <li><a href="#" class="nav-item" data-page="ai">
+          <span class="nav-icon">🤖</span><span>AI 코치</span>
+        </a></li>
+        <li><a href="#" class="nav-item" data-page="profile">
+          <span class="nav-icon">👤</span><span>프로필</span>
+        </a></li>
+      </ul>
+
+      <button class="btn-logout" id="logoutBtn">
+        <span>🚪</span> 로그아웃
+      </button>
+    </nav>
+
+    <!-- 모바일 햄버거 버튼 -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <main class="main-content" id="mainContent">
+
+      <!-- ======= 대시보드 페이지 ======= -->
+      <div id="page-dashboard" class="page active">
+        <div class="page-header">
+          <h2 class="page-title">대시보드</h2>
+          <div class="page-subtitle" id="dashboardGreeting">안녕하세요! 오늘도 파이팅! 💪</div>
+        </div>
+
+        <!-- 상단 스탯 카드 -->
+        <div class="stats-grid">
+          <div class="stat-card stat-card--level">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-info">
+              <div class="stat-label">레벨</div>
+              <div class="stat-value" id="dashLevel">1</div>
+            </div>
+            <div class="stat-badge" id="dashTier">BRONZE</div>
+          </div>
+          <div class="stat-card stat-card--score">
+            <div class="stat-icon">🔥</div>
+            <div class="stat-info">
+              <div class="stat-label">주간 점수</div>
+              <div class="stat-value" id="dashWeeklyScore">0</div>
+            </div>
+          </div>
+          <div class="stat-card stat-card--streak">
+            <div class="stat-icon">📅</div>
+            <div class="stat-info">
+              <div class="stat-label">연속 운동</div>
+              <div class="stat-value" id="dashStreak">0<span style="font-size:0.5em">일</span></div>
+            </div>
+          </div>
+          <div class="stat-card stat-card--today">
+            <div class="stat-icon">💪</div>
+            <div class="stat-info">
+              <div class="stat-label">오늘 운동</div>
+              <div class="stat-value" id="dashTodayWorkouts">0<span style="font-size:0.5em">회</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EXP 바 -->
+        <div class="glass-card exp-card">
+          <div class="exp-header">
+            <span>경험치 <span id="expCurrent">0</span> / <span id="expNext">1000</span></span>
+            <span class="exp-percent" id="expPercent">0%</span>
+          </div>
+          <div class="exp-bar-container">
+            <div class="exp-bar-fill" id="expBarFill" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- 대시보드 하단 3열 레이아웃 -->
+        <div class="dashboard-grid">
+
+          <!-- 오늘의 미션 -->
+          <div class="glass-card missions-card">
+            <h3 class="card-title">⚔️ 오늘의 미션</h3>
+            <div id="missionsList" class="missions-list">
+              <div class="skeleton-loading">로딩 중...</div>
+            </div>
+          </div>
+
+          <!-- 실시간 랭킹 -->
+          <div class="glass-card ranking-card">
+            <h3 class="card-title">🏆 실시간 주간 랭킹</h3>
+            <div id="realtimeRanking" class="ranking-list">
+              <div class="skeleton-loading">로딩 중...</div>
+            </div>
+          </div>
+
+          <!-- AI 피드백 -->
+          <div class="glass-card ai-card">
+            <h3 class="card-title">🤖 AI 코치 피드백</h3>
+            <div id="aiFeedback" class="ai-feedback-content">
+              <div class="ai-loading">
+                <div class="ai-pulse"></div>
+                <span>AI가 분석 중...</span>
+              </div>
+            </div>
+            <button class="btn-secondary btn-sm mt-2" id="refreshAIBtn">새 분석 받기</button>
+          </div>
+        </div>
+
+        <!-- 최근 활동 피드 -->
+        <div class="glass-card activity-feed-card">
+          <h3 class="card-title">📡 실시간 활동 피드</h3>
+          <div id="activityFeed" class="activity-feed">
+            <div class="feed-empty">실시간 운동 완료 알림이 여기 표시됩니다.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======= 운동 기록 페이지 ======= -->
+      <div id="page-workout" class="page hidden">
+        <div class="page-header">
+          <h2 class="page-title">운동 기록</h2>
+          <button class="btn-primary" id="openWorkoutModal">+ 운동 추가</button>
+        </div>
+
+        <!-- 달력 -->
+        <div class="glass-card">
+          <div class="calendar-header">
+            <button class="btn-icon-only" id="calPrev">◀</button>
+            <h3 id="calendarTitle">오늘 날짜 기준</h3>
+            <button class="btn-icon-only" id="calNext">▶</button>
+          </div>
+          <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+
+        <!-- 선택된 날짜 운동 목록 -->
+        <div class="glass-card" id="selectedDayWorkouts" style="display:none;">
+          <h3 class="card-title" id="selectedDayTitle">선택된 날짜</h3>
+          <div id="dayWorkoutList"></div>
+        </div>
+
+        <!-- 최근 운동 기록 -->
+        <div class="glass-card">
+          <h3 class="card-title">📋 최근 운동 기록</h3>
+          <div id="workoutList">
+            <div class="skeleton-loading">로딩 중...</div>
+          </div>
+          <button class="btn-secondary mt-2" id="loadMoreWorkouts">더 보기</button>
+        </div>
+      </div>
+
+      <!-- ======= 통계 페이지 ======= -->
+      <div id="page-stats" class="page hidden">
+        <div class="page-header">
+          <h2 class="page-title">운동 통계</h2>
+          <div class="period-tabs">
+            <button class="period-tab active" data-period="week">주간</button>
+            <button class="period-tab" data-period="month">월간</button>
+            <button class="period-tab" data-period="quarter">3개월</button>
+          </div>
+        </div>
+
+        <div class="stats-charts-grid">
+          <div class="glass-card chart-card">
+            <h3 class="card-title">📈 일별 점수 추이</h3>
+            <canvas id="scoreChart" height="200"></canvas>
+          </div>
+          <div class="glass-card chart-card">
+            <h3 class="card-title">🥧 운동 종류 분포</h3>
+            <canvas id="typeChart" height="200"></canvas>
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <h3 class="card-title">📊 핵심 지표</h3>
+          <div class="kpi-grid" id="kpiGrid"></div>
+        </div>
+      </div>
+
+      <!-- ======= 랭킹 페이지 ======= -->
+      <div id="page-ranking" class="page hidden">
+        <div class="page-header">
+          <h2 class="page-title">랭킹</h2>
+          <div class="ranking-tabs">
+            <button class="ranking-tab active" data-type="weekly">주간</button>
+            <button class="ranking-tab" data-type="global">전체</button>
+            <button class="ranking-tab" data-type="friends">친구</button>
+          </div>
+        </div>
+        <div class="glass-card">
+          <div id="rankingList" class="ranking-full-list">
+            <div class="skeleton-loading">로딩 중...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======= 배틀 페이지 ======= -->
+      <div id="page-battle" class="page hidden">
+        <div class="page-header">
+          <h2 class="page-title">⚔️ 배틀</h2>
+          <div class="page-subtitle">이번 주 점수로 다른 플레이어와 경쟁하세요!</div>
+        </div>
+
+        <!-- 배틀 스탯 -->
+        <div class="battle-stats-row">
+          <div class="glass-card battle-stat">
+            <div class="battle-stat-label">승리</div>
+            <div class="battle-stat-value win" id="battleWins">0</div>
+          </div>
+          <div class="glass-card battle-stat">
+            <div class="battle-stat-label">패배</div>
+            <div class="battle-stat-value lose" id="battleLosses">0</div>
+          </div>
+          <div class="glass-card battle-stat">
+            <div class="battle-stat-label">포인트</div>
+            <div class="battle-stat-value points" id="battlePoints">0</div>
+          </div>
+        </div>
+
+        <!-- 상대 검색 -->
+        <div class="glass-card">
+          <h3 class="card-title">상대 찾기</h3>
+          <div class="search-row">
+            <input type="text" id="battleSearchInput" placeholder="닉네임으로 검색..." class="search-input">
+            <button class="btn-primary" id="battleSearchBtn">🔍 검색</button>
+          </div>
+          <div id="battleSearchResults" class="battle-search-results"></div>
+        </div>
+
+        <!-- 배틀 기록 -->
+        <div class="glass-card">
+          <h3 class="card-title">최근 배틀 기록</h3>
+          <div id="battleHistory" class="battle-history"></div>
+        </div>
+      </div>
+
+      <!-- ======= 업적 페이지 ======= -->
+      <div id="page-achievements" class="page hidden">
+        <div class="page-header">
+          <h2 class="page-title">🎖️ 업적</h2>
+          <div id="achievementProgress" class="achievement-progress">0 / 0 달성</div>
+        </div>
+        <div id="achievementGrid" class="achievement-grid">
+          <div class="skeleton-loading">로딩 중...</div>
+        </div>
+      </div>
+
+      <!-- ======= AI 코치 페이지 ======= -->
+      <div id="page-ai" class="page hidden">
+        <div class="page-header">
+          <h2 class="page-title">🤖 AI 코치</h2>
+          <div class="page-subtitle">OpenAI 기반 개인 맞춤 운동 분석</div>
+        </div>
+
+        <div class="ai-grid">
+          <div class="glass-card">
+            <h3 class="card-title">📊 운동 밸런스 분석</h3>
+            <button class="btn-primary" id="analyzeBtn">분석 시작</button>
+            <div id="aiAnalysisResult" class="ai-result hidden"></div>
+          </div>
+
+          <div class="glass-card">
+            <h3 class="card-title">📋 맞춤 루틴 추천</h3>
+            <div class="routine-options">
+              <select id="routineGoal" class="form-select">
+                <option value="근력 향상">근력 향상</option>
+                <option value="다이어트">다이어트</option>
+                <option value="체력 증진">체력 증진</option>
+                <option value="근육 증가">근육 증가</option>
+              </select>
+              <select id="routineDays" class="form-select">
+                <option value="3">주 3회</option>
+                <option value="4" selected>주 4회</option>
+                <option value="5">주 5회</option>
+              </select>
+              <button class="btn-primary" id="getRoutineBtn">루틴 추천받기</button>
+            </div>
+            <div id="routineResult" class="routine-result hidden"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======= 프로필 페이지 ======= -->
+      <div id="page-profile" class="page hidden">
+        <div class="page-header">
+          <h2 class="page-title">👤 프로필</h2>
+        </div>
+
+        <div class="profile-layout">
+          <div class="glass-card profile-card">
+            <div class="profile-avatar-large" id="profileAvatarLarge"></div>
+            <div class="profile-name" id="profileName">Loading...</div>
+            <div class="profile-tier-badge" id="profileTierBadge">BRONZE</div>
+            <div class="profile-level" id="profileLevel">Lv. 1</div>
+
+            <div class="profile-stats-row">
+              <div class="profile-stat">
+                <div class="profile-stat-value" id="profileTotalScore">0</div>
+                <div class="profile-stat-label">총 점수</div>
+              </div>
+              <div class="profile-stat">
+                <div class="profile-stat-value" id="profileBattleWins">0</div>
+                <div class="profile-stat-label">배틀 승리</div>
+              </div>
+              <div class="profile-stat">
+                <div class="profile-stat-value" id="profileStreak">0</div>
+                <div class="profile-stat-label">연속일</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <h3 class="card-title">프로필 수정</h3>
+            <form id="profileEditForm">
+              <div class="form-group">
+                <label>닉네임</label>
+                <input type="text" id="editNickname" class="form-input" placeholder="새 닉네임">
+              </div>
+              <div class="form-group">
+                <label>프로필 이미지</label>
+                <input type="file" id="editProfileImage" accept="image/*">
+              </div>
+              <button type="submit" class="btn-primary">저장</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ============================
+    운동 추가 모달
+  ============================ -->
+  <div id="workoutModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>💪 운동 추가</h3>
+        <button class="modal-close" id="closeWorkoutModal">✕</button>
+      </div>
+
+      <form id="workoutForm">
+        <!-- 운동 종류 선택 -->
+        <div class="workout-type-grid" id="workoutTypeGrid">
+          <button type="button" class="workout-type-btn" data-type="bench_press">🏋️ 벤치프레스</button>
+          <button type="button" class="workout-type-btn" data-type="squat">🦵 스쿼트</button>
+          <button type="button" class="workout-type-btn" data-type="deadlift">💀 데드리프트</button>
+          <button type="button" class="workout-type-btn" data-type="running">🏃 러닝</button>
+          <button type="button" class="workout-type-btn" data-type="cycling">🚴 사이클</button>
+          <button type="button" class="workout-type-btn" data-type="push_up">🤸 푸쉬업</button>
+          <button type="button" class="workout-type-btn" data-type="free">⭐ 자유 운동</button>
+        </div>
+
+        <!-- 근력 운동 입력 폼 -->
+        <div id="strengthForm" class="workout-detail-form hidden">
+          <div class="sets-container" id="setsContainer">
+            <div class="set-row" data-set="1">
+              <span class="set-label">세트 1</span>
+              <input type="number" placeholder="무게(kg)" class="set-weight" min="0" step="0.5">
+              <input type="number" placeholder="횟수" class="set-reps" min="0">
+              <button type="button" class="btn-remove-set">✕</button>
+            </div>
+          </div>
+          <button type="button" class="btn-add-set" id="addSetBtn">+ 세트 추가</button>
+        </div>
+
+        <!-- 유산소 운동 입력 폼 -->
+        <div id="cardioForm" class="workout-detail-form hidden">
+          <div class="form-row">
+            <div class="form-group">
+              <label>시간 (분)</label>
+              <input type="number" id="workoutDuration" placeholder="30" min="0" class="form-input">
+            </div>
+            <div class="form-group">
+              <label>거리 (km, 선택)</label>
+              <input type="number" id="workoutDistance" placeholder="5.0" min="0" step="0.1" class="form-input">
+            </div>
+          </div>
+        </div>
+
+        <!-- 날짜 및 메모 -->
+        <div class="form-group">
+          <label>날짜</label>
+          <input type="date" id="workoutDate" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>메모 (선택)</label>
+          <textarea id="workoutNote" class="form-input" placeholder="오늘 운동 느낌은?" rows="2"></textarea>
+        </div>
+
+        <!-- 예상 점수 표시 -->
+        <div class="score-preview" id="scorePreview">
+          <span>예상 점수: </span><span id="previewScore">0</span>점
+          <span> · EXP: </span><span id="previewExp">0</span>
+        </div>
+
+        <button type="submit" class="btn-primary btn-full">기록 저장 🎮</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 레벨업 오버레이 -->
+  <div id="levelUpOverlay" class="level-up-overlay hidden">
+    <div class="level-up-content">
+      <div class="level-up-icon">⚡</div>
+      <div class="level-up-text">LEVEL UP!</div>
+      <div class="level-up-new" id="levelUpNewLevel">Lv. 2</div>
+    </div>
+  </div>
+
+  <!-- 알림 토스트 -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- 메인 JS -->
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/game.js"></script>
+  <script src="/js/workout.js"></script>
+  <script src="/js/ranking.js"></script>
+  <script src="/js/stats.js"></script>
+  <script src="/js/ai.js"></script>
+  <script src="/js/socket.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

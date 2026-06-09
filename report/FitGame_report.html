@@ -1,0 +1,1320 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FitGame Report</title>
+    <style>
+      :root {
+        --bg: #0b1020;
+        --panel: #121a33;
+        --panel2: #0f172a;
+        --text: #e8eefc;
+        --muted: #aab7d4;
+        --primary: #7c3aed;
+        --primary2: #06b6d4;
+        --accent: #22c55e;
+        --border: rgba(255, 255, 255, 0.12);
+        --code: #0a0f1f;
+        --shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        line-height: 1.75;
+        color: var(--text);
+        background:
+          radial-gradient(
+            circle at top left,
+            rgba(124, 58, 237, 0.35),
+            transparent 32%
+          ),
+          radial-gradient(
+            circle at top right,
+            rgba(6, 182, 212, 0.24),
+            transparent 30%
+          ),
+          linear-gradient(180deg, #080d1b 0%, #0b1020 45%, #070b16 100%);
+      }
+      body:before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+          linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.035) 1px,
+            transparent 1px
+          );
+        background-size: 36px 36px;
+        mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), transparent);
+        pointer-events: none;
+      }
+      .container {
+        width: min(1120px, 92vw);
+        margin: 0 auto;
+        padding: 44px 0 80px;
+      }
+      .hero {
+        position: relative;
+        overflow: hidden;
+        padding: 54px 42px;
+        margin-bottom: 28px;
+        border: 1px solid var(--border);
+        border-radius: 30px;
+        background:
+          linear-gradient(
+            135deg,
+            rgba(124, 58, 237, 0.22),
+            rgba(6, 182, 212, 0.12)
+          ),
+          rgba(18, 26, 51, 0.78);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px);
+      }
+      .hero:after {
+        content: "FitGame";
+        position: absolute;
+        right: 24px;
+        bottom: -34px;
+        font-size: 112px;
+        font-weight: 900;
+        color: rgba(255, 255, 255, 0.055);
+        letter-spacing: -6px;
+      }
+      .badge {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        padding: 7px 13px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.07);
+        color: #d8e7ff;
+        font-size: 14px;
+        font-weight: 700;
+      }
+      .hero h1 {
+        margin: 18px 0 12px;
+        font-size: clamp(34px, 5vw, 58px);
+        line-height: 1.08;
+        letter-spacing: -1.5px;
+      }
+      .subtitle {
+        max-width: 760px;
+        color: var(--muted);
+        font-size: 18px;
+        margin: 0;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        gap: 26px;
+        align-items: start;
+      }
+      .toc {
+        position: sticky;
+        top: 22px;
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        background: rgba(15, 23, 42, 0.78);
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+        padding: 20px;
+        backdrop-filter: blur(14px);
+      }
+      .toc strong {
+        display: block;
+        margin-bottom: 12px;
+        color: #fff;
+      }
+      .toc a {
+        display: block;
+        text-decoration: none;
+        color: var(--muted);
+        padding: 8px 10px;
+        border-radius: 12px;
+        font-size: 14px;
+      }
+      .toc a:hover {
+        background: rgba(124, 58, 237, 0.18);
+        color: #fff;
+      }
+      .content {
+        min-width: 0;
+      }
+      .card {
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        background: rgba(18, 26, 51, 0.82);
+        padding: 34px;
+        margin-bottom: 22px;
+        box-shadow: 0 18px 54px rgba(0, 0, 0, 0.24);
+        backdrop-filter: blur(14px);
+      }
+      h1 {
+        display: none;
+      }
+      h2 {
+        margin: 0 0 22px;
+        font-size: 30px;
+        letter-spacing: -0.8px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--border);
+      }
+      h2:before {
+        content: "";
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 10px;
+        background: linear-gradient(135deg, var(--primary), var(--primary2));
+        box-shadow: 0 0 24px rgba(6, 182, 212, 0.8);
+      }
+      h3 {
+        margin: 28px 0 10px;
+        font-size: 21px;
+        color: #f8fbff;
+      }
+      p {
+        color: #d7def1;
+        margin: 10px 0 14px;
+      }
+      strong {
+        color: #fff;
+      }
+      em {
+        color: #c7d2fe;
+      }
+      hr {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 28px 0;
+      }
+      .meta {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-top: 24px;
+      }
+      .meta div {
+        padding: 16px;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.055);
+      }
+      .meta span {
+        display: block;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .meta b {
+        font-size: 15px;
+      }
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin: 18px 0;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        overflow: hidden;
+        background: rgba(8, 13, 27, 0.45);
+      }
+      th,
+      td {
+        padding: 13px 15px;
+        text-align: left;
+        vertical-align: top;
+        border-bottom: 1px solid var(--border);
+      }
+      th {
+        background: linear-gradient(
+          135deg,
+          rgba(124, 58, 237, 0.24),
+          rgba(6, 182, 212, 0.16)
+        );
+        color: #fff;
+        font-weight: 800;
+      }
+      tr:last-child td {
+        border-bottom: 0;
+      }
+      td {
+        color: #d8e0f3;
+      }
+      ul,
+      ol {
+        padding-left: 22px;
+        color: #d8e0f3;
+      }
+      li {
+        margin: 6px 0;
+      }
+      pre {
+        position: relative;
+        overflow: auto;
+        padding: 22px;
+        border-radius: 18px;
+        border: 1px solid rgba(124, 58, 237, 0.35);
+        background: linear-gradient(
+          180deg,
+          rgba(10, 15, 31, 0.98),
+          rgba(3, 7, 18, 0.98)
+        );
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      }
+      code {
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 14px;
+        color: #dbeafe;
+      }
+      p code,
+      li code,
+      td code {
+        background: rgba(124, 58, 237, 0.16);
+        border: 1px solid rgba(124, 58, 237, 0.25);
+        padding: 2px 7px;
+        border-radius: 8px;
+        color: #e9d5ff;
+      }
+      .callout {
+        border-left: 4px solid var(--primary2);
+        background: rgba(6, 182, 212, 0.08);
+        padding: 16px 18px;
+        border-radius: 16px;
+        margin: 18px 0;
+        color: #dff6ff;
+      }
+      .footer {
+        text-align: center;
+        color: var(--muted);
+        padding: 28px 0 0;
+      }
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .toc {
+          position: relative;
+          top: 0;
+        }
+        .meta {
+          grid-template-columns: 1fr 1fr;
+        }
+        .hero {
+          padding: 36px 24px;
+        }
+        .card {
+          padding: 24px;
+        }
+      }
+      @media print {
+        body {
+          background: #fff;
+          color: #111;
+        }
+        .toc {
+          display: none;
+        }
+        .layout {
+          display: block;
+        }
+        .hero,
+        .card {
+          box-shadow: none;
+          background: #fff;
+          color: #111;
+          border-color: #ddd;
+        }
+        p,
+        li,
+        td {
+          color: #222;
+        }
+        h2,
+        h3,
+        strong {
+          color: #111;
+        }
+        pre {
+          white-space: pre-wrap;
+          background: #f6f8fa;
+        }
+        code {
+          color: #111;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <section class="hero">
+        <span class="badge">웹프로그래밍 과제 제작보고서</span>
+        <h1>FitGame</h1>
+        <p class="subtitle">
+          운동 기록 기반 경쟁형 헬스 게임 프로젝트 보고서를 읽기 편한 카드형
+          HTML 페이지로 정리했습니다.
+        </p>
+        <div class="meta">
+          <div><span>프로젝트명</span><b>FitGame</b></div>
+          <div><span>개발 언어</span><b>HTML / CSS / JS</b></div>
+          <div><span>백엔드</span><b>Node.js / MongoDB</b></div>
+          <div><span>개발 기간</span><b>2026년 5월</b></div>
+        </div>
+      </section>
+      <div class="layout">
+        <nav class="toc">
+          <strong>목차</strong>
+          <a href="#프로젝트-개요">1. 프로젝트 개요</a>
+          <a href="#개발-환경">2. 개발 환경</a>
+          <a href="#웹페이지-구성">3. 웹페이지 구성</a>
+          <a href="#주요-기능-설명">4. 주요 기능 설명</a>
+          <a href="#주요-코드-리뷰">5. 주요 코드 리뷰</a>
+          <a href="#ai-활용-내역">6. AI 활용 내역</a>
+          <a href="#구현-결과">7. 구현 결과</a>
+          <a href="#느낀점">8. 느낀점</a>
+        </nav>
+        <main class="content">
+          <h1 id="웹프로그래밍-과제-제작보고서">
+            웹프로그래밍 과제 제작보고서
+          </h1>
+          <p>
+            <strong>프로젝트명:</strong> FitGame — 운동 기록 기반 경쟁형 헬스
+            게임<br />
+            <strong>개발 언어:</strong> HTML5 / CSS3 / JavaScript (ES6+)<br />
+            <strong>개발 도구:</strong> VS Code, Node.js, MongoDB<br />
+            <strong>개발 기간:</strong> 2026년 5월
+          </p>
+          <hr />
+          <h2 id="프로젝트-개요">1. 프로젝트 개요</h2>
+          <h3 id="프로젝트-목적">1.1 프로젝트 목적</h3>
+          <p>
+            본 프로젝트는 단순한 운동 기록 앱을 넘어, 게임적
+            요소(Gamification)를 접목한 피트니스 웹 애플리케이션 ’FitGame’을
+            설계 및 구현하였다. 사용자가 운동을 기록할 때마다 점수와
+            경험치(EXP)를 획득하고, 레벨·티어 시스템 및 1:1 배틀 기능을 통해
+            경쟁과 동기부여를 동시에 경험할 수 있도록 하였다.
+          </p>
+          <h3 id="개발-배경">1.2 개발 배경</h3>
+          <p>
+            현대인의 운동 지속률은 낮으며, 기존 피트니스 앱은 ’기록’에만
+            집중하여 흥미를 유지하기 어렵다는 문제를 발견하였다. 이에 게임의
+            보상 심리(레벨업, 업적, 랭킹)와 소셜 경쟁 요소를 결합함으로써 운동
+            지속 동기를 높이는 서비스를 개발하고자 하였다.
+          </p>
+          <h3 id="주요-기능">1.3 주요 기능</h3>
+          <table>
+            <colgroup>
+              <col style="width: 50%" />
+              <col style="width: 50%" />
+            </colgroup>
+            <thead>
+              <tr class="header">
+                <th>기능</th>
+                <th>설명</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="odd">
+                <td>게임화 시스템</td>
+                <td>
+                  운동 기록 시 점수·EXP 자동 계산 → 레벨업 → 5단계 티어(Bronze ~
+                  Diamond) 승급
+                </td>
+              </tr>
+              <tr class="even">
+                <td>실시간 배틀</td>
+                <td>주간 점수 기반 1:1 배틀, Socket.io로 결과를 즉시 알림</td>
+              </tr>
+              <tr class="odd">
+                <td>업적 시스템</td>
+                <td>6종 업적 달성 시 포인트 보상 및 즉시 알림</td>
+              </tr>
+              <tr class="even">
+                <td>AI 코치</td>
+                <td>
+                  OpenAI GPT-3.5 기반 운동 분석 및 맞춤 루틴 추천 (데모 모드
+                  지원)
+                </td>
+              </tr>
+              <tr class="odd">
+                <td>통계 대시보드</td>
+                <td>Chart.js 기반 주간/월간 운동 추이·운동 타입별 분석 차트</td>
+              </tr>
+              <tr class="even">
+                <td>소셜 기능</td>
+                <td>친구 추가, 친구 랭킹, 실시간 활동 피드</td>
+              </tr>
+              <tr class="odd">
+                <td>운동 달력</td>
+                <td>날짜별 운동 기록 조회 가능한 직관적 캘린더 UI</td>
+              </tr>
+            </tbody>
+          </table>
+          <hr />
+          <h2 id="개발-환경">2. 개발 환경</h2>
+          <table>
+            <colgroup>
+              <col style="width: 27%" />
+              <col style="width: 27%" />
+              <col style="width: 45%" />
+            </colgroup>
+            <thead>
+              <tr class="header">
+                <th>구분</th>
+                <th>항목</th>
+                <th>버전/상세</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="odd">
+                <td>사용 언어 (프론트엔드)</td>
+                <td>HTML5 / CSS3 / JavaScript (ES6+)</td>
+                <td>바닐라 JS, 모듈 패턴</td>
+              </tr>
+              <tr class="even">
+                <td>사용 언어 (백엔드)</td>
+                <td>Node.js / Express.js</td>
+                <td>v18+</td>
+              </tr>
+              <tr class="odd">
+                <td>데이터베이스</td>
+                <td>MongoDB + Mongoose</td>
+                <td>v6+ / v8+</td>
+              </tr>
+              <tr class="even">
+                <td>실시간 통신</td>
+                <td>Socket.io</td>
+                <td>v4.7</td>
+              </tr>
+              <tr class="odd">
+                <td>인증</td>
+                <td>JWT + bcryptjs</td>
+                <td>jsonwebtoken v9</td>
+              </tr>
+              <tr class="even">
+                <td>AI 연동</td>
+                <td>OpenAI API (GPT-3.5-turbo)</td>
+                <td>openai v4</td>
+              </tr>
+              <tr class="odd">
+                <td>차트 라이브러리</td>
+                <td>Chart.js</td>
+                <td>CDN</td>
+              </tr>
+              <tr class="even">
+                <td>파일 업로드</td>
+                <td>Multer</td>
+                <td>v1.4</td>
+              </tr>
+              <tr class="odd">
+                <td>개발 도구</td>
+                <td>VS Code, Nodemon</td>
+                <td>자동 재시작</td>
+              </tr>
+              <tr class="even">
+                <td>실행 환경</td>
+                <td>웹 브라우저 (Chrome 권장)</td>
+                <td>localhost:3000</td>
+              </tr>
+            </tbody>
+          </table>
+          <hr />
+          <h2 id="웹페이지-구성">3. 웹페이지 구성</h2>
+          <h3 id="전체-페이지-구조-spa-방식">
+            3.1 전체 페이지 구조 (SPA 방식)
+          </h3>
+          <p>
+            본 프로젝트는 하나의 <code>index.html</code> 파일 안에 모든 페이지
+            콘텐츠를 포함하는 단일 페이지 애플리케이션(SPA) 구조로 설계하였다.
+            JavaScript의 <code>app.js</code>가 라우터 역할을 담당하며,
+            <code>data-page</code> 속성을 기반으로 현재 활성화할 페이지 섹션을
+            동적으로 전환하였다.
+          </p>
+          <h3 id="각-페이지-역할-설명">3.2 각 페이지 역할 설명</h3>
+          <table style="width: 100%">
+            <colgroup>
+              <col style="width: 40%" />
+              <col style="width: 37%" />
+              <col style="width: 22%" />
+            </colgroup>
+            <thead>
+              <tr class="header">
+                <th>페이지 ID</th>
+                <th>페이지명</th>
+                <th>역할</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="odd">
+                <td>page-dashboard</td>
+                <td>대시보드</td>
+                <td>
+                  로그인 후 첫 화면. 레벨·티어·주간점수·연속일수·미션·실시간
+                  랭킹 표시
+                </td>
+              </tr>
+              <tr class="even">
+                <td>page-workout</td>
+                <td>운동 기록</td>
+                <td>
+                  운동 종류 선택, 세트/반복/무게 입력, 캘린더 기반 날짜별 조회
+                </td>
+              </tr>
+              <tr class="odd">
+                <td>page-stats</td>
+                <td>통계</td>
+                <td>
+                  Chart.js 기반 주간·월간 운동 추이 차트, 운동 타입별 분석
+                </td>
+              </tr>
+              <tr class="even">
+                <td>page-ranking</td>
+                <td>랭킹</td>
+                <td>전체/주간/친구 랭킹 탭, 상위 사용자 순위 표시</td>
+              </tr>
+              <tr class="odd">
+                <td>page-battle</td>
+                <td>배틀</td>
+                <td>1:1 주간 점수 배틀 신청·결과 확인, 승/패 기록</td>
+              </tr>
+              <tr class="even">
+                <td>page-achievements</td>
+                <td>업적</td>
+                <td>6종 업적 달성 현황, 달성 시 포인트 획득</td>
+              </tr>
+              <tr class="odd">
+                <td>page-ai</td>
+                <td>AI 코치</td>
+                <td>OpenAI 기반 운동 분석·루틴 추천·채팅 인터페이스</td>
+              </tr>
+              <tr class="even">
+                <td>page-profile</td>
+                <td>프로필</td>
+                <td>닉네임·프로필 이미지 수정, 내 게임 통계 확인</td>
+              </tr>
+            </tbody>
+          </table>
+          <h3 id="페이지-이동-흐름">3.3 페이지 이동 흐름</h3>
+          <p>
+            ① 브라우저 접속 → ② <code>localStorage</code>에서 JWT 토큰 확인 → ③
+            토큰 없음: 로그인/회원가입 화면 표시 → ④ 토큰 있음:
+            <code>/api/auth/me</code> 요청으로 유저 정보 조회 → ⑤ 인증 성공 시
+            대시보드로 이동 → ⑥ 사이드바 메뉴 클릭 시 <code>app.js</code>의
+            <code>navigateTo()</code> 함수가 해당 페이지 섹션을 활성화
+          </p>
+          <hr />
+          <h2 id="주요-기능-설명">4. 주요 기능 설명</h2>
+          <h3 id="운동-기록-및-점수-계산-시스템">
+            4.1 운동 기록 및 점수 계산 시스템
+          </h3>
+          <p>
+            사용자가 운동 종류를 선택하고 세트 정보(무게·반복 수) 또는 유산소
+            정보(시간·거리)를 입력하면, 서버에서 운동 타입별 가중치를 적용하여
+            점수를 자동 계산하였다. 계산된 점수의 1/10이 EXP로 변환되며, 최소 10
+            EXP를 보장하도록 구현하였다.
+          </p>
+          <table>
+            <colgroup>
+              <col style="width: 30%" />
+              <col style="width: 38%" />
+              <col style="width: 30%" />
+            </colgroup>
+            <thead>
+              <tr class="header">
+                <th>운동 유형</th>
+                <th>점수 계산 공식</th>
+                <th>가중치 예시</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="odd">
+                <td>근력 운동</td>
+                <td>(무게 × 반복 × 세트 수) / 10 × 가중치</td>
+                <td>스쿼트 1.3, 데드리프트 1.4</td>
+              </tr>
+              <tr class="even">
+                <td>유산소 운동</td>
+                <td>시간(분) × 가중치</td>
+                <td>러닝 2.0, 사이클 1.5</td>
+              </tr>
+              <tr class="odd">
+                <td>자유 운동</td>
+                <td>시간(분) × 1.0</td>
+                <td>기본 가중치 적용</td>
+              </tr>
+            </tbody>
+          </table>
+          <h3 id="레벨-티어-시스템">4.2 레벨 · 티어 시스템</h3>
+          <p>
+            레벨업에 필요한 누적 EXP는 <code>100 × N × (N+1) / 2</code> 공식으로
+            계산하여 레벨이 높을수록 더 많은 운동이 필요하도록 설계하였다. 레벨
+            구간에 따라 5단계 티어(Bronze → Silver → Gold → Platinum →
+            Diamond)가 자동으로 부여된다.
+          </p>
+          <h3 id="실시간-배틀-socket.io">4.3 실시간 배틀 (Socket.io)</h3>
+          <p>
+            친구에게 배틀을 신청하면, 양측의 주간 점수를 비교하여 즉시 승패를
+            결정하였다. Socket.io를 활용하여 배틀 결과, 레벨업 알림, 업적 달성
+            알림이 모든 연결된 클라이언트에 실시간으로 전달되도록 구현하였다.
+          </p>
+          <h3 id="ai-코치-openai-api">4.4 AI 코치 (OpenAI API)</h3>
+          <p>
+            사용자의 운동 기록을 분석하여 GPT-3.5-turbo 모델에게 맞춤 피드백과
+            루틴 추천을 요청하였다. OpenAI API 키가 없는 경우에도 데모 모드로
+            자동 전환되어 서비스가 중단 없이 동작하도록 설계하였다.
+          </p>
+          <hr />
+          <h2 id="주요-코드-리뷰">5. 주요 코드 리뷰</h2>
+          <h3 id="spa-라우터-app.js-navigateto-함수">
+            5.1 SPA 라우터 (<code>app.js</code> — <code>navigateTo</code> 함수)
+          </h3>
+          <table>
+            <colgroup>
+              <col style="width: 50%" />
+              <col style="width: 50%" />
+            </colgroup>
+            <thead>
+              <tr class="header">
+                <th>항목</th>
+                <th>내용</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="odd">
+                <td>사용 파일</td>
+                <td><code>public/js/app.js</code></td>
+              </tr>
+              <tr class="even">
+                <td>구현 목적</td>
+                <td>
+                  페이지 전체를 새로고침하지 않고, 특정 섹션만 보이도록 전환하는
+                  SPA 라우터 구현
+                </td>
+              </tr>
+              <tr class="odd">
+                <td>동작 원리</td>
+                <td>
+                  모든 <code>.page</code> 요소에 <code>hidden</code> 클래스를
+                  추가한 뒤, 요청된 page ID에만 <code>active</code> 클래스를
+                  부여함
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="sourceCode" id="cb1">
+            <pre
+              class="sourceCode javascript"
+            ><code class="sourceCode javascript"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">navigateTo</span>(page<span class="op">,</span> force <span class="op">=</span> <span class="kw">false</span>) {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="op">!</span>force <span class="op">&amp;&amp;</span> currentPage <span class="op">===</span> page) <span class="cf">return</span><span class="op">;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  currentPage <span class="op">=</span> page<span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="bu">document</span><span class="op">.</span><span class="fu">querySelectorAll</span>(<span class="st">&#39;.page&#39;</span>)<span class="op">.</span><span class="fu">forEach</span>(el <span class="kw">=&gt;</span> {</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    el<span class="op">.</span><span class="at">classList</span><span class="op">.</span><span class="fu">add</span>(<span class="st">&#39;hidden&#39;</span>)<span class="op">;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    el<span class="op">.</span><span class="at">classList</span><span class="op">.</span><span class="fu">remove</span>(<span class="st">&#39;active&#39;</span>)<span class="op">;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> section <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">getElementById</span>(<span class="vs">`page-</span><span class="sc">${</span>page<span class="sc">}</span><span class="vs">`</span>)<span class="op">;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (section) {</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    section<span class="op">.</span><span class="at">classList</span><span class="op">.</span><span class="fu">remove</span>(<span class="st">&#39;hidden&#39;</span>)<span class="op">;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    section<span class="op">.</span><span class="at">classList</span><span class="op">.</span><span class="fu">add</span>(<span class="st">&#39;active&#39;</span>)<span class="op">;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (page <span class="op">===</span> <span class="st">&#39;dashboard&#39;</span>) <span class="cf">await</span> <span class="bu">window</span><span class="op">.</span><span class="at">GamePage</span><span class="op">?.</span><span class="at">loadDashboard</span><span class="op">?.</span>()<span class="op">;</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (page <span class="op">===</span> <span class="st">&#39;workout&#39;</span>)   <span class="cf">await</span> <span class="bu">window</span><span class="op">.</span><span class="at">WorkoutPage</span><span class="op">?.</span><span class="at">init</span><span class="op">?.</span>()<span class="op">;</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ... 각 페이지별 초기화 함수 호출</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>}</span></code></pre>
+          </div>
+          <p>
+            위 코드는 서버 요청 없이 클라이언트 측에서 화면을 전환하는 SPA의
+            핵심 라우터이다. <code>hidden</code>/<code>active</code> CSS
+            클래스를 DOM에 동적으로 조작하여 불필요한 서버 재요청을 방지하고
+            빠른 화면 전환을 실현하였다. 또한 Optional
+            Chaining(<code>?.</code>)을 사용하여 각 모듈이 로드되지 않은
+            경우에도 오류 없이 동작하도록 방어 코드를 적용하였다.
+          </p>
+          <hr />
+          <h3 id="운동-점수-계산-로직-serverroutesworkout.js">
+            5.2 운동 점수 계산 로직 (<code>server/routes/workout.js</code>)
+          </h3>
+          <table>
+            <colgroup>
+              <col style="width: 50%" />
+              <col style="width: 50%" />
+            </colgroup>
+            <thead>
+              <tr class="header">
+                <th>항목</th>
+                <th>내용</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="odd">
+                <td>사용 파일</td>
+                <td>
+                  <code>server/routes/workout.js</code>,
+                  <code>server/config/gameConfig.js</code>
+                </td>
+              </tr>
+              <tr class="even">
+                <td>구현 목적</td>
+                <td>
+                  운동 종류에 따라 점수를 계산하고, EXP로 변환하여 사용자 스탯에
+                  누적
+                </td>
+              </tr>
+              <tr class="odd">
+                <td>동작 원리</td>
+                <td>
+                  운동 타입(strength/cardio)에 따라 다른 공식을 적용, EXP =
+                  score / 10 + 최소 10 EXP 보장
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="sourceCode" id="cb2">
+            <pre
+              class="sourceCode javascript"
+            ><code class="sourceCode javascript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// 점수 계산 (핵심 게임 로직)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> score <span class="op">=</span> <span class="fu">calculateWorkoutScore</span>(workoutData)<span class="op">;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> expGained <span class="op">=</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">round</span>(score <span class="op">/</span> EXP_PER_SCORE) <span class="op">+</span> <span class="dv">10</span><span class="op">;</span> <span class="co">// 최소 10 EXP</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">// 사용자 스탯 업데이트</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> { leveledUp<span class="op">,</span> newLevel } <span class="op">=</span> user<span class="op">.</span><span class="fu">addExp</span>(expGained)<span class="op">;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>user<span class="op">.</span><span class="at">gameStats</span><span class="op">.</span><span class="at">totalScore</span> <span class="op">+=</span> score<span class="op">;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>user<span class="op">.</span><span class="at">gameStats</span><span class="op">.</span><span class="at">weeklyScore</span> <span class="op">+=</span> score<span class="op">;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">// 레벨업 시 Socket.io로 즉시 알림 전송</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (leveledUp) {</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sendToUser</span>(user<span class="op">.</span><span class="at">_id</span><span class="op">,</span> <span class="st">&#39;level_up&#39;</span><span class="op">,</span> { newLevel<span class="op">,</span> tier })<span class="op">;</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre>
+          </div>
+          <p>
+            이 코드는 운동 기록이 단순 저장에 그치지 않고 게임 보상으로 즉시
+            이어지는 핵심 로직이다. 운동 → 점수 → EXP → 레벨업 → 알림의
+            파이프라인이 단일 API 요청 안에서 모두 처리되도록 설계하였다. 레벨업
+            발생 시 <code>sendToUser()</code> 함수로 해당 사용자에게만 이벤트를
+            전송하여 실시간 피드백을 제공하였다.
+          </p>
+          <hr />
+          <h3 id="레벨-계산-알고리즘-serverconfiggameconfig.js">
+            5.3 레벨 계산 알고리즘 (<code>server/config/gameConfig.js</code>)
+          </h3>
+          <table>
+            <colgroup>
+              <col style="width: 50%" />
+              <col style="width: 50%" />
+            </colgroup>
+            <thead>
+              <tr class="header">
+                <th>항목</th>
+                <th>내용</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="odd">
+                <td>사용 파일</td>
+                <td><code>server/config/gameConfig.js</code></td>
+              </tr>
+              <tr class="even">
+                <td>구현 목적</td>
+                <td>누적 EXP로 현재 레벨을 계산하는 수학적 공식 구현</td>
+              </tr>
+              <tr class="odd">
+                <td>동작 원리</td>
+                <td>
+                  삼각수(triangular number) 공식으로 레벨별 누적 EXP를 산출,
+                  while 루프로 레벨 역산
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="sourceCode" id="cb3">
+            <pre
+              class="sourceCode javascript"
+            ><code class="sourceCode javascript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// 레벨 N 달성에 필요한 총 EXP = 100 × N × (N+1) / 2</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> getLevelRequiredExp <span class="op">=</span> (level) <span class="kw">=&gt;</span> <span class="dv">100</span> <span class="op">*</span> level <span class="op">*</span> (level <span class="op">+</span> <span class="dv">1</span>) <span class="op">/</span> <span class="dv">2</span><span class="op">;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">// 현재 EXP로 레벨 계산</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> calculateLevel <span class="op">=</span> (totalExp) <span class="kw">=&gt;</span> {</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span> level <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span> (<span class="fu">getLevelRequiredExp</span>(level) <span class="op">&lt;=</span> totalExp) {</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    level<span class="op">++;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> level <span class="op">-</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre>
+          </div>
+          <p>
+            레벨이 높아질수록 요구 EXP가 증가하는 ’삼각수 공식’을 적용하여
+            게임의 성장 곡선을 구현하였다. 예를 들어 레벨 1은 100 EXP, 레벨 5는
+            1,500 EXP가 필요하여 초반에는 빠르게, 후반에는 도전적으로 성장할 수
+            있도록 설계하였다. 이 공식은 프론트엔드와 백엔드 모두에서 동일하게
+            적용되어 클라이언트-서버 간 레벨 계산 불일치를 방지하였다.
+          </p>
+          <hr />
+          <h3 id="socket.io-실시간-통신-serversocketsockethandler.js">
+            5.4 Socket.io 실시간 통신
+            (<code>server/socket/socketHandler.js</code>)
+          </h3>
+          <table>
+            <colgroup>
+              <col style="width: 50%" />
+              <col style="width: 50%" />
+            </colgroup>
+            <thead>
+              <tr class="header">
+                <th>항목</th>
+                <th>내용</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="odd">
+                <td>사용 파일</td>
+                <td>
+                  <code>server/socket/socketHandler.js</code>,
+                  <code>public/js/socket.js</code>
+                </td>
+              </tr>
+              <tr class="even">
+                <td>구현 목적</td>
+                <td>
+                  JWT 인증 기반의 개인 소켓 룸을 구성, 사용자별 실시간 알림 전달
+                </td>
+              </tr>
+              <tr class="odd">
+                <td>동작 원리</td>
+                <td>
+                  연결 시 JWT 검증 → userId 기반 개인 룸(<code>user:{id}</code>)
+                  입장 → 서버에서 <code>sendToUser()</code>로 대상 전송
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="sourceCode" id="cb4">
+            <pre
+              class="sourceCode javascript"
+            ><code class="sourceCode javascript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// JWT 인증 미들웨어 (Socket.io용)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>io<span class="op">.</span><span class="fu">use</span>(<span class="kw">async</span> (socket<span class="op">,</span> next) <span class="kw">=&gt;</span> {</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> token <span class="op">=</span> socket<span class="op">.</span><span class="at">handshake</span><span class="op">.</span><span class="at">auth</span><span class="op">.</span><span class="at">token</span><span class="op">;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> decoded <span class="op">=</span> jwt<span class="op">.</span><span class="fu">verify</span>(token<span class="op">,</span> <span class="bu">process</span><span class="op">.</span><span class="at">env</span><span class="op">.</span><span class="at">JWT_SECRET</span>)<span class="op">;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  socket<span class="op">.</span><span class="at">userId</span> <span class="op">=</span> decoded<span class="op">.</span><span class="at">userId</span><span class="op">;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">next</span>()<span class="op">;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>io<span class="op">.</span><span class="fu">on</span>(<span class="st">&#39;connection&#39;</span><span class="op">,</span> (socket) <span class="kw">=&gt;</span> {</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 인증된 유저는 개인 룸에 입장</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (socket<span class="op">.</span><span class="at">userId</span>) socket<span class="op">.</span><span class="fu">join</span>(<span class="vs">`user:</span><span class="sc">${</span>socket<span class="op">.</span><span class="at">userId</span><span class="sc">}</span><span class="vs">`</span>)<span class="op">;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">// 특정 유저에게만 이벤트 전송</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> sendToUser <span class="op">=</span> (userId<span class="op">,</span> <span class="bu">event</span><span class="op">,</span> data) <span class="kw">=&gt;</span> {</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  io<span class="op">.</span><span class="fu">to</span>(<span class="vs">`user:</span><span class="sc">${</span>userId<span class="sc">}</span><span class="vs">`</span>)<span class="op">.</span><span class="fu">emit</span>(<span class="bu">event</span><span class="op">,</span> data)<span class="op">;</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre>
+          </div>
+          <p>
+            Socket.io의 ‘룸(Room)’ 개념을 활용하여 각 사용자에게 독립된 개인
+            채널을 부여하였다. 이를 통해 레벨업, 업적 달성, 배틀 결과 알림이
+            해당 사용자에게만 전달되도록 구현하였으며, HTTP REST API와 달리
+            서버에서 클라이언트로 먼저 이벤트를 전송(Push)할 수 있는 구조를
+            실현하였다.
+          </p>
+          <hr />
+          <h3 id="ai-코치-데모-모드-폴백-serverroutesai.js">
+            5.5 AI 코치 데모 모드 폴백 (<code>server/routes/ai.js</code>)
+          </h3>
+          <table>
+            <colgroup>
+              <col style="width: 50%" />
+              <col style="width: 50%" />
+            </colgroup>
+            <thead>
+              <tr class="header">
+                <th>항목</th>
+                <th>내용</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="odd">
+                <td>사용 파일</td>
+                <td><code>server/routes/ai.js</code></td>
+              </tr>
+              <tr class="even">
+                <td>구현 목적</td>
+                <td>
+                  OpenAI API 키 유무에 관계없이 AI 코치 기능이 항상 동작하도록
+                  폴백 설계
+                </td>
+              </tr>
+              <tr class="odd">
+                <td>동작 원리</td>
+                <td>
+                  서버 시작 시 API 키를 확인하여 openai 인스턴스 초기화, 없으면
+                  null 유지 후 데모 응답 반환
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="sourceCode" id="cb5">
+            <pre
+              class="sourceCode javascript"
+            ><code class="sourceCode javascript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> openai <span class="op">=</span> <span class="kw">null</span><span class="op">;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span> {</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="bu">process</span><span class="op">.</span><span class="at">env</span><span class="op">.</span><span class="at">OPENAI_API_KEY</span> <span class="op">&amp;&amp;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>      <span class="bu">process</span><span class="op">.</span><span class="at">env</span><span class="op">.</span><span class="at">OPENAI_API_KEY</span> <span class="op">!==</span> <span class="st">&#39;sk-your-openai-api-key-here&#39;</span>) {</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    openai <span class="op">=</span> <span class="kw">new</span> <span class="fu">OpenAI</span>({ <span class="dt">apiKey</span><span class="op">:</span> <span class="bu">process</span><span class="op">.</span><span class="at">env</span><span class="op">.</span><span class="at">OPENAI_API_KEY</span> })<span class="op">;</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">console</span><span class="op">.</span><span class="fu">warn</span>(<span class="st">&#39;AI 데모 모드로 동작합니다.&#39;</span>)<span class="op">;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>} <span class="cf">catch</span> (e) { <span class="bu">console</span><span class="op">.</span><span class="fu">error</span>(<span class="st">&#39;OpenAI 초기화 실패:&#39;</span><span class="op">,</span> e<span class="op">.</span><span class="at">message</span>)<span class="op">;</span> }</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">// API 호출 시 폴백 처리</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="op">!</span>openai) <span class="cf">return</span> res<span class="op">.</span><span class="fu">json</span>(<span class="fu">getDemoAnalysis</span>(workoutSummary))<span class="op">;</span></span></code></pre>
+          </div>
+          <p>
+            API 키 없이도 서비스가 완전히 중단되지 않도록 graceful
+            degradation(점진적 성능 저하) 패턴을 적용하였다. 실제 강의·발표
+            환경처럼 외부 API 키를 사용하기 어려운 상황에서도 AI 코치 UI와 기능
+            흐름을 그대로 시연할 수 있도록 설계한 실용적인 방어 코드이다.
+          </p>
+          <hr />
+          <h3 id="운동-달력-렌더링-publicjsworkout.js-rendercalendar">
+            5.6 운동 달력 렌더링 (<code>public/js/workout.js</code> —
+            <code>renderCalendar</code>)
+          </h3>
+          <table>
+            <colgroup>
+              <col style="width: 50%" />
+              <col style="width: 50%" />
+            </colgroup>
+            <thead>
+              <tr class="header">
+                <th>항목</th>
+                <th>내용</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="odd">
+                <td>사용 파일</td>
+                <td><code>public/js/workout.js</code></td>
+              </tr>
+              <tr class="even">
+                <td>구현 목적</td>
+                <td>
+                  외부 라이브러리 없이 순수 JavaScript로 월별 달력을 동적 생성
+                </td>
+              </tr>
+              <tr class="odd">
+                <td>동작 원리</td>
+                <td>
+                  <code>Date</code> 객체로 해당 월의 첫 요일과 마지막 날짜를
+                  계산, 7열 CSS Grid로 달력을 HTML 문자열로 조립
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="sourceCode" id="cb6">
+            <pre
+              class="sourceCode javascript"
+            ><code class="sourceCode javascript"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">renderCalendar</span>(date) {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> year <span class="op">=</span> date<span class="op">.</span><span class="fu">getFullYear</span>()<span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> month <span class="op">=</span> date<span class="op">.</span><span class="fu">getMonth</span>()<span class="op">;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> firstDay <span class="op">=</span> <span class="kw">new</span> <span class="bu">Date</span>(year<span class="op">,</span> month<span class="op">,</span> <span class="dv">1</span>)<span class="op">.</span><span class="fu">getDay</span>()<span class="op">;</span>     <span class="co">// 첫 날 요일</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> lastDate <span class="op">=</span> <span class="kw">new</span> <span class="bu">Date</span>(year<span class="op">,</span> month <span class="op">+</span> <span class="dv">1</span><span class="op">,</span> <span class="dv">0</span>)<span class="op">.</span><span class="fu">getDate</span>()<span class="op">;</span> <span class="co">// 마지막 날짜</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 빈 셀(이전 달 공백) + 날짜 셀 생성</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (<span class="kw">let</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> firstDay<span class="op">;</span> i<span class="op">++</span>) html <span class="op">+=</span> <span class="vs">`&lt;div&gt;&lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (<span class="kw">let</span> d <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> d <span class="op">&lt;=</span> lastDate<span class="op">;</span> d<span class="op">++</span>) {</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> isToday <span class="op">=</span> (dateStr <span class="op">===</span> todayStr)<span class="op">;</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    html <span class="op">+=</span> <span class="vs">`&lt;div class=&quot;cal-day </span><span class="sc">${</span>isToday <span class="op">?</span> <span class="st">&#39;today&#39;</span> <span class="op">:</span> <span class="st">&#39;&#39;</span><span class="sc">}</span><span class="vs">&quot;&gt;</span><span class="sc">${</span>d<span class="sc">}</span><span class="vs">&lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  grid<span class="op">.</span><span class="at">innerHTML</span> <span class="op">=</span> html<span class="op">;</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>}</span></code></pre>
+          </div>
+          <p>
+            외부 캘린더 라이브러리 없이 <code>Date</code> 내장 객체만으로 월별
+            달력을 완전히 구현하였다. <code>getDay()</code>로 첫 날의 요일을
+            파악하여 공백 셀을 삽입하고,
+            <code>new Date(year, month+1, 0).getDate()</code>로 해당 월의 마지막
+            날짜를 구하는 JavaScript의 특성을 활용하였다. 달력 날짜에 운동
+            기록이 있으면 별도 표시를 추가하여 직관적인 기록 현황 파악이
+            가능하도록 구현하였다.
+          </p>
+          <hr />
+          <h2 id="ai-활용-내역">6. AI 활용 내역</h2>
+          <p>
+            본 프로젝트 개발 과정에서 Claude AI와 ChatGPT를 활용하여 코드 설계,
+            오류 해결, 문서 작성에 도움을 받았다.
+          </p>
+          <table>
+            <colgroup>
+              <col style="width: 11%" />
+              <col style="width: 16%" />
+              <col style="width: 24%" />
+              <col style="width: 22%" />
+              <col style="width: 25%" />
+            </colgroup>
+            <thead>
+              <tr class="header">
+                <th>번호</th>
+                <th>AI 도구</th>
+                <th>사용 프롬프트</th>
+                <th>AI 답변 요약</th>
+                <th>실제 적용 내용</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="odd">
+                <td>1</td>
+                <td>Claude AI</td>
+                <td>
+                  Socket.io에서 특정 유저에게만 알림을 보내려면 어떻게 해야
+                  하나요?
+                </td>
+                <td>
+                  <code>socket.join()</code>으로 개인 룸 생성 후
+                  <code>io.to(roomId).emit()</code> 패턴 제안, JWT 인증 미들웨어
+                  예시 제공
+                </td>
+                <td>
+                  <code>socketHandler.js</code>의 <code>user:{id}</code> 룸
+                  구조에 그대로 적용
+                </td>
+              </tr>
+              <tr class="even">
+                <td>2</td>
+                <td>ChatGPT</td>
+                <td>
+                  레벨업 시스템에서 레벨이 높을수록 더 많은 EXP가 필요한 수식을
+                  만들어줘
+                </td>
+                <td>
+                  삼각수(Triangular Number) 공식
+                  <code>100 × N × (N+1) / 2</code> 제안, 레벨별 필요 EXP 예시 표
+                  제공
+                </td>
+                <td>
+                  <code>gameConfig.js</code>의
+                  <code>getLevelRequiredExp()</code> 함수에 그대로 적용
+                </td>
+              </tr>
+              <tr class="odd">
+                <td>3</td>
+                <td>Claude AI</td>
+                <td>
+                  OpenAI API 키가 없을 때도 AI 기능이 동작하게 하는 방법은?
+                </td>
+                <td>
+                  환경변수 조건 분기 후 데모 응답 반환 패턴, try-catch로 초기화
+                  실패 처리 방법 안내
+                </td>
+                <td>
+                  <code>server/routes/ai.js</code>의
+                  <code>getDemoAnalysis()</code> 폴백 구조에 적용
+                </td>
+              </tr>
+              <tr class="even">
+                <td>4</td>
+                <td>ChatGPT</td>
+                <td>
+                  외부 라이브러리 없이 순수 JS로 월별 달력을 그리는 코드 알려줘
+                </td>
+                <td>
+                  <code>Date</code> 객체의 <code>getDay()</code>와
+                  <code>new Date(y, m+1, 0)</code> 트릭으로 빈 셀·날짜 셀 계산
+                  코드 제공
+                </td>
+                <td>
+                  <code>workout.js</code>의 <code>renderCalendar()</code> 함수
+                  구현에 활용
+                </td>
+              </tr>
+              <tr class="odd">
+                <td>5</td>
+                <td>Claude AI</td>
+                <td>
+                  JWT 토큰을 localStorage에 저장하고 만료 시 자동으로 로그인
+                  화면으로 이동하게 해줘
+                </td>
+                <td>
+                  <code>api.js</code>에서 401 응답 시
+                  <code>window.showAuth()</code> 호출하는 중앙화된 에러 처리
+                  패턴 제안
+                </td>
+                <td>
+                  <code>api.js</code>의 공통 fetch 래퍼 함수에 401 처리 로직으로
+                  적용
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <hr />
+          <h2 id="구현-결과">7. 구현 결과</h2>
+          <h3 id="주요-화면-설명">7.1 주요 화면 설명</h3>
+          <table>
+            <colgroup>
+              <col style="width: 37%" />
+              <col style="width: 62%" />
+            </colgroup>
+            <thead>
+              <tr class="header">
+                <th>화면</th>
+                <th>구현 내용</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="odd">
+                <td>로그인/회원가입</td>
+                <td>
+                  JWT 기반 인증, 이메일·비밀번호 유효성 검사, 닉네임 중복 확인
+                  기능 구현
+                </td>
+              </tr>
+              <tr class="even">
+                <td>대시보드</td>
+                <td>
+                  레벨·티어·주간점수·연속일수 카드, EXP 프로그레스 바, 실시간
+                  랭킹, 일일 미션 목록 표시
+                </td>
+              </tr>
+              <tr class="odd">
+                <td>운동 기록</td>
+                <td>
+                  운동 종류별 세트 폼 동적 생성, 세트 추가/삭제, 달력 기반
+                  날짜별 조회 구현
+                </td>
+              </tr>
+              <tr class="even">
+                <td>통계</td>
+                <td>
+                  Chart.js 도넛·바 차트로 운동 타입 분포 및 주간 추이 시각화
+                </td>
+              </tr>
+              <tr class="odd">
+                <td>랭킹</td>
+                <td>전체·주간·친구 탭 전환, 실시간 Socket.io 랭킹 업데이트</td>
+              </tr>
+              <tr class="even">
+                <td>AI 코치</td>
+                <td>운동 분석·루틴 추천·채팅 탭 구성, 데모 모드 자동 전환</td>
+              </tr>
+            </tbody>
+          </table>
+          <h3 id="구현-성공-내용">7.2 구현 성공 내용</h3>
+          <ol type="1">
+            <li>
+              SPA 구조로 페이지 전환 속도가 빠르고, 브라우저 새로고침 없이 모든
+              기능 이용 가능
+            </li>
+            <li>
+              운동 기록 → 점수 계산 → EXP 누적 → 레벨업 → 실시간 알림까지
+              이어지는 게임 파이프라인 완성
+            </li>
+            <li>
+              Socket.io 실시간 통신으로 레벨업, 업적 달성, 배틀 결과 즉시 알림
+              구현
+            </li>
+            <li>
+              OpenAI API 미연동 상태에서도 데모 모드로 AI 코치 기능 정상 동작
+            </li>
+            <li>
+              Chart.js 기반 통계 차트 및 순수 JS 달력 구현으로 외부 의존성
+              최소화
+            </li>
+            <li>
+              다크 네온 테마 + Glassmorphism 디자인으로 게임 앱다운 UI/UX 완성
+            </li>
+          </ol>
+          <h3 id="개선-가능-사항">7.3 개선 가능 사항</h3>
+          <ul>
+            <li>
+              현재 배틀은 즉시 점수 비교 방식으로, 일정 기간 동안 점수를
+              누적하는 시즌 배틀 시스템으로 발전 가능
+            </li>
+            <li>친구 간 실시간 채팅 기능 및 운동 루틴 공유 기능 추가 가능</li>
+            <li>
+              모바일 PWA(Progressive Web App) 전환으로 앱 아이콘 설치 및
+              오프라인 지원 가능
+            </li>
+            <li>
+              운동 영상 인식(카메라 기반 자세 교정) AI 기능 연계 가능성 검토
+            </li>
+            <li>
+              MongoDB Atlas 클라우드 배포 및 HTTPS 적용으로 실서비스 전환 가능
+            </li>
+          </ul>
+          <hr />
+          <h2 id="느낀점">8. 느낀점</h2>
+          <h3 id="개발-과정에서-배운-점">8.1 개발 과정에서 배운 점</h3>
+          <p>
+            이번 프로젝트를 통해 프론트엔드와 백엔드가 어떻게 REST API와
+            Socket.io로 연결되는지 전체 흐름을 직접 경험하였다. 특히 SPA
+            라우터를 직접 구현하면서 React·Vue 같은 프레임워크가 내부에서 어떤
+            원리로 동작하는지 깊이 이해하게 되었다. 또한 JWT 인증, 소켓 룸,
+            MongoDB 스키마 설계 등 실제 서비스에서 사용되는 기술 스택을 직접
+            구현함으로써 웹 개발 전반에 대한 이해도가 크게 향상되었다.
+          </p>
+          <h3 id="어려웠던-점">8.2 어려웠던 점</h3>
+          <p>
+            가장 어려웠던 부분은 Socket.io와 JWT 인증을 결합하는 작업이었다.
+            HTTP 요청과 달리 소켓 연결은 헤더 구조가 달라 인증 토큰을 별도로
+            전달해야 했으며, 연결 중단 시 재연결 처리, 개인 룸 관리 등 HTTP
+            API에서는 고려하지 않아도 되는 부분들을 추가로 설계해야 하였다. 또한
+            순수 JavaScript만으로 SPA를 구현하면서 페이지 이동 시 이벤트
+            리스너가 중복 등록되는 문제가 발생하여
+            <code>eventsBound</code> 플래그로 중복 등록을 방지하는 방법을
+            학습하였다.
+          </p>
+          <h3 id="해결-과정">8.3 해결 과정</h3>
+          <p>
+            Socket.io 인증 문제는 공식 문서와 AI의 도움을 통해
+            <code>handshake.auth.token</code> 방식으로 해결하였다. 이벤트 중복
+            등록 문제는 바인딩 여부를 추적하는 bool 플래그를 각 모듈에 추가하여
+            해결하였다. 전반적으로 에러 메시지를 검색하고, AI에게 구체적인
+            상황을 설명하며 질문하는 방식으로 대부분의 문제를 해결할 수
+            있었으며, 이 과정에서 스스로 문제를 분석하고 해결하는 디버깅 능력이
+            향상되었다고 느꼈다.
+          </p>
+          <hr />
+          <p>
+            <em
+              >— 이상으로 FitGame 웹프로그래밍 과제 제작보고서를 마칩니다 —</em
+            >
+          </p>
+        </main>
+      </div>
+      <div class="footer">FitGame Web Programming Report</div>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const main = document.querySelector(".content");
+        [...main.children].forEach((el) => {
+          if (el.tagName === "H2") {
+            const card = document.createElement("section");
+            card.className = "card";
+            main.insertBefore(card, el);
+            card.appendChild(el);
+            let n = card.nextSibling;
+            while (n && !(n.nodeType === 1 && n.tagName === "H2")) {
+              const next = n.nextSibling;
+              card.appendChild(n);
+              n = next;
+            }
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
