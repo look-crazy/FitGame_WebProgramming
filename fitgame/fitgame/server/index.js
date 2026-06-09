@@ -1,9 +1,9 @@
 /**
  * FitGame - 메인 서버 진입점
- * Express + Socket.io + MongoDB 통합 서버
+ * Express + MongoDB 통합 서버
  */
 
-// 환경변수 로드 (가장 먼저 실행되어야 함)
+// 환경변수 로드
 require('dotenv').config();
 
 const express = require('express');
@@ -28,14 +28,37 @@ const socketHandler = require('./socket/socketHandler');
 // Express 앱 초기화
 const app = express();
 
-// HTTP 서버 생성 (Socket.io를 위해 필요)
+// HTTP 서버 생성
 const server = http.createServer(app);
+
+// ================================
+// DB 연결 미들웨어
+// Vercel에서는 요청이 들어올 때 DB 연결 확인
+// ================================
+let dbConnected = false;
+
+app.use(async (req, res, next) => {
+  if (!dbConnected) {
+    try {
+      await connectDB();
+      dbConnected = true;
+    } catch (err) {
+      console.error('MongoDB 연결 실패:', err);
+      return res.status(500).json({
+        success: false,
+        message: 'MongoDB 연결 실패'
+      });
+    }
+  }
+
+  next();
+});
 
 // ================================
 // 미들웨어 설정
 // ================================
 
-// CORS 설정 - 프론트엔드에서 API 호출 허용
+// CORS 설정
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:3000',
   credentials: true
@@ -45,7 +68,7 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// 정적 파일 서빙 (프론트엔드 HTML/CSS/JS)
+// 정적 파일 서빙
 app.use(express.static(path.join(__dirname, '../public')));
 
 // 업로드 파일 서빙
@@ -54,19 +77,17 @@ app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 // ================================
 // API 라우트 등록
 // ================================
-app.use('/api/auth', authRoutes);           // 인증 (회원가입, 로그인)
-app.use('/api/workouts', workoutRoutes);    // 운동 기록 CRUD
-app.use('/api/game', gameRoutes);           // 게임 시스템 (레벨, 티어, 업적)
-app.use('/api/ranking', rankingRoutes);     // 랭킹 시스템
-app.use('/api/ai', aiRoutes);              // AI 분석 및 추천
-app.use('/api/users', userRoutes);          // 유저 프로필, 친구
+app.use('/api/auth', authRoutes);
+app.use('/api/workouts', workoutRoutes);
+app.use('/api/game', gameRoutes);
+app.use('/api/ranking', rankingRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/users', userRoutes);
 
 // ================================
 // SPA 폴백 라우팅
-// 모든 미정의 GET 요청은 index.html로 보냄
 // ================================
 app.get('*', (req, res) => {
-  // API 요청이 아닌 경우에만 index.html 반환
   if (!req.path.startsWith('/api')) {
     res.sendFile(path.join(__dirname, '../public/index.html'));
   }
@@ -77,6 +98,7 @@ app.get('*', (req, res) => {
 // ================================
 app.use((err, req, res, next) => {
   console.error('서버 에러:', err.stack);
+
   res.status(err.status || 500).json({
     success: false,
     message: err.message || '서버 내부 오류가 발생했습니다.',
@@ -85,19 +107,11 @@ app.use((err, req, res, next) => {
 });
 
 // ================================
-// Socket.io 초기화
-// ================================
-socketHandler(server);
-
-// ================================
 // 서버 시작
 // ================================
 const PORT = process.env.PORT || 3000;
 
-connectDB().catch(err => {
-  console.error('MongoDB 연결 실패:', err);
-});
-
+// 로컬 개발환경에서만 Socket.io와 server.listen 실행
 if (process.env.NODE_ENV !== 'production') {
   socketHandler(server);
 
@@ -106,4 +120,5 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
+// Vercel에서는 app만 export
 module.exports = app;
