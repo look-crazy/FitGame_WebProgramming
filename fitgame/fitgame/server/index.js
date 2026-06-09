@@ -9,6 +9,7 @@ const express = require('express');
 const http = require('http');
 const path = require('path');
 const cors = require('cors');
+const mongoose = require('mongoose');
 
 const connectDB = require('./config/database');
 
@@ -40,13 +41,35 @@ app.use(express.static(path.join(__dirname, '../public')));
 // 업로드 파일 서빙
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
+// ================================
+// DB 연결 확인 미들웨어
+// API 요청이 들어올 때 MongoDB 연결을 먼저 확인
+// ================================
+const ensureDBConnected = async (req, res, next) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      await connectDB();
+    }
+
+    next();
+  } catch (err) {
+    console.error('API 요청 전 MongoDB 연결 실패:', err);
+
+    return res.status(500).json({
+      success: false,
+      message: 'MongoDB 연결 실패',
+      error: err.message
+    });
+  }
+};
+
 // API 라우트
-app.use('/api/auth', authRoutes);
-app.use('/api/workouts', workoutRoutes);
-app.use('/api/game', gameRoutes);
-app.use('/api/ranking', rankingRoutes);
-app.use('/api/ai', aiRoutes);
-app.use('/api/users', userRoutes);
+app.use('/api/auth', ensureDBConnected, authRoutes);
+app.use('/api/workouts', ensureDBConnected, workoutRoutes);
+app.use('/api/game', ensureDBConnected, gameRoutes);
+app.use('/api/ranking', ensureDBConnected, rankingRoutes);
+app.use('/api/ai', ensureDBConnected, aiRoutes);
+app.use('/api/users', ensureDBConnected, userRoutes);
 
 // SPA 폴백 라우팅
 app.get('*', (req, res) => {
@@ -69,15 +92,6 @@ app.use((err, req, res, next) => {
 // 서버 시작
 const PORT = process.env.PORT || 3000;
 
-// Vercel에서도 DB 연결 시도
-connectDB()
-  .then(() => {
-    console.log('MongoDB 연결 완료');
-  })
-  .catch(err => {
-    console.error('MongoDB 연결 실패:', err);
-  });
-
 // 로컬에서만 Socket.io + listen 실행
 if (process.env.NODE_ENV !== 'production') {
   socketHandler(server);
@@ -87,4 +101,5 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
+// Vercel에서는 app만 export
 module.exports = app;
