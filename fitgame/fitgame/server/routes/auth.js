@@ -16,10 +16,10 @@ const { authMiddleware } = require('../middleware/auth');
 // ================================
 // 프로필 이미지 업로드 설정 (Multer)
 // ================================
-const uploadDir = path.join(__dirname, '../../public/uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+//const uploadDir = path.join(__dirname, '../../public/uploads');
+//if (!fs.existsSync(uploadDir)) {
+//  fs.mkdirSync(uploadDir, { recursive: true });
+//}
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
