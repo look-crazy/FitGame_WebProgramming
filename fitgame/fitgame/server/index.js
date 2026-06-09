@@ -94,19 +94,16 @@ socketHandler(server);
 // ================================
 const PORT = process.env.PORT || 3000;
 
-// MongoDB 연결 후 서버 시작
-connectDB().then(() => {
-  server.listen(PORT, () => {
-    console.log('=====================================');
-    console.log('🎮 FitGame 서버가 시작되었습니다!');
-    console.log(`📡 포트: ${PORT}`);
-    console.log(`🌐 URL: http://localhost:${PORT}`);
-    console.log(`🔧 환경: ${process.env.NODE_ENV}`);
-    console.log('=====================================');
-  });
-}).catch(err => {
-  console.error('서버 시작 실패:', err);
-  process.exit(1);
+connectDB().catch(err => {
+  console.error('MongoDB 연결 실패:', err);
 });
 
-module.exports = { app, server };
+if (process.env.NODE_ENV !== 'production') {
+  socketHandler(server);
+
+  server.listen(PORT, () => {
+    console.log(`서버 실행: http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
